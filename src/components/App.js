@@ -1,70 +1,74 @@
-import React, { Component, useEffect, useState } from "react";
+import React, { Component, useState } from "react";
 import "../styles/App.css";
-
-const App = () => {
-  const [renderBall, setRenderBall] = useState(false);
-  const [x, setX] = useState(0);
-  const [y, setY] = useState(0);
-  const [ballPosition,setBallPosition] = useState({
-    left: "0px",
-    top: "0px",
-  });
-  const reset = () => {
-    setRenderBall(false);
-    updateXY(0,0);
-  };
-  const start = () => {
-    setRenderBall(true);
-  };
-  const renderChoice = () => {
-    return renderBall ? ( <div className="ball" style={{
-      position: 'absolute',
-      left: ballPosition.left,
-      top: ballPosition.top
-    }}></div>): (
-    <button onClick={start} className="start">
-      Start
-    </button>
-    );
-  };
-
-  const updateXY = (newX,newY) => {
-    setX(newX);
-    setY(newY);
-    setBallPosition({
-      left: newX + "px",
-      top: newY + "px"
-    });
+class Timer extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { time: 0, x: 0, y: 0 ,ballRender: false, fun:null};
+    this.renderBall=this.renderBall.bind(this)
+    this.moveBall=this.moveBall.bind(this)
+    
   }
-  useEffect(() => {
-    const keyListner = (evt) => {
-      console.log('Listen key');
-      if(renderBall) {
-      if(evt.keyCode === 37) {
-         updateXY(x-5,y);
-      } else if(evt.keyCode === 38) {
-        updateXY(x,y-5);
-      } else if(evt.keyCode === 39) {
-        updateXY(x+5,y);
-      } else if(evt.keyCode === 40) {
-        updateXY(x,y+5);
+
+    renderBall(){
+    this.setState({ballRender:true})
+    this.state.fun=setInterval(()=>{this.setState({time:this.state.time+1})},1000);
+  
+    document.addEventListener('keydown',this.moveBall);
+    //document.removeEventListener("onKeyDown",this.moveBall)
+  }
+  
+ moveBall(evt){
+    if(this.state.ballRender){
+      if(evt.keyCode===37){
+        this.setState({x:this.state.x-5})
+      }
+      else if(evt.keyCode===38){
+        this.setState({y:this.state.y-5})
+      }
+      else if(evt.keyCode===39){
+        this.setState({x:this.state.x+5})
+      }
+      else if(evt.keyCode===40){
+        this.setState({y:this.state.y+5})
       }
     }
-    };
-    document.addEventListener('keydown',keyListner)
+  
+  }
 
-    // cleanup 
-    return () => document.removeEventListener('keydown',keyListner);
-  });
-  return (
+  componentDidMount() {
     
-    <div className="playground">
-      <button onClick={reset} className="reset">
-        Reset
-      </button>
-      {renderChoice()}
-    </div>
-  );
-};
+  }
 
-export default App;
+  componentWillUnmount() {
+    
+  }   
+
+componentDidUpdate(){
+  if(this.state.ballRender){
+    if(this.state.x===250&&this.state.y===250){
+      document.removeEventListener('keydown',this.moveBall)
+      clearInterval(this.state.fun)
+    }
+  }
+ 
+}
+//()=>{this.setState({ballRender:true})}
+
+//()=>{setInterval(()=>{this.setState({time:this.state.time+1})},1000)}
+
+  render() {
+    return (
+ <>
+ {!this.state.ballRender?<button className="start" onClick={this.renderBall}> click here</button>:(<>
+  <div className="ball" style={{left:this.state.x+'px',top:this.state.y+'px'}}></div>
+ <div className="hole"></div>
+ <div className="heading-timer" >{this.state.time}</div>
+ <div className="ballProvider">{this.state.time}</div>
+ </>)}
+
+</>
+    );
+  }
+}
+
+export default Timer;
